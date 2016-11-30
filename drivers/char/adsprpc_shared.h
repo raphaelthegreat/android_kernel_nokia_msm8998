@@ -126,8 +126,15 @@ struct remote_buf64 {
 	uint64_t len;
 };
 
+struct remote_dma_handle64 {
+	int fd;
+	uint32_t offset;
+	uint32_t len;
+};
+
 union remote_arg64 {
 	struct remote_buf64	buf;
+	struct remote_dma_handle64 dma;
 	uint32_t h;
 };
 
@@ -138,8 +145,14 @@ struct remote_buf {
 	size_t len;		/* length of buffer */
 };
 
+struct remote_dma_handle {
+	int fd;
+	uint32_t offset;
+};
+
 union remote_arg {
 	struct remote_buf buf;	/* buffer info */
+	struct remote_dma_handle dma;
 	uint32_t h;		/* remote handle */
 };
 
@@ -283,7 +296,7 @@ static inline struct smq_invoke_buf *smq_invoke_buf_start(remote_arg64_t *pra,
 static inline struct smq_phy_page *smq_phy_page_start(uint32_t sc,
 						struct smq_invoke_buf *buf)
 {
-	uint64_t nTotal = REMOTE_SCALARS_INBUFS(sc)+REMOTE_SCALARS_OUTBUFS(sc);
+	uint64_t nTotal = REMOTE_SCALARS_LENGTH(sc);
 
 	return (struct smq_phy_page *)(&buf[nTotal]);
 }

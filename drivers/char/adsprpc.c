@@ -77,6 +77,7 @@
 #define BALIGN		128
 #define NUM_CHANNELS	4		/* adsp,sdsp,mdsp,cdsp */
 #define NUM_SESSIONS	9		/*8 compute, 1 cpz*/
+#define M_FDLIST 16
 #define FASTRPC_CTX_MAGIC (0xbeeddeed)
 #define FASTRPC_CTX_MAX (256)
 #define FASTRPC_CTXID_MASK (0xFF0)
@@ -1355,12 +1356,13 @@ static int get_args(uint32_t kernel, struct smq_invoke_ctx *ctx)
 	uint32_t sc = ctx->sc;
 	int inbufs = REMOTE_SCALARS_INBUFS(sc);
 	int outbufs = REMOTE_SCALARS_OUTBUFS(sc);
-	int bufs = inbufs + outbufs;
+	int handles, bufs = inbufs + outbufs;
 	uintptr_t args;
 	size_t rlen = 0, copylen = 0, metalen = 0, lrpralen = 0;
-	int i, inh, oix;
+	int i, oix;
 	int err = 0;
 	int mflags = 0;
+	uint64_t *fdlist;
 	DEFINE_DMA_ATTRS(ctx_attrs);
 
 	/* calculate size of the metadata */
@@ -1379,7 +1381,15 @@ static int get_args(uint32_t kernel, struct smq_invoke_ctx *ctx)
 					mflags, &ctx->maps[i]);
 		ipage += 1;
 	}
-	metalen = copylen = (size_t)&ipage[0];
+	handles = REMOTE_SCALARS_INHANDLES(sc) + REMOTE_SCALARS_OUTHANDLES(sc);
+	for (i = bufs; i < bufs + handles; i++) {
+		VERIFY(err, !fastrpc_mmap_create(ctx->fl, ctx->fds[i],
+				FASTRPC_ATTR_NOVA, 0, 0, 0, &ctx->maps[i]));
+		if (err)
+			goto bail;
+		ipage += 1;
+	}
+	metalen = copylen = (ssize_t)&ipage[0] + (sizeof(uint64_t) * M_FDLIST);
 
 	/* allocate new local rpra buffer */
 	lrpralen = (size_t)&list[0];
@@ -1439,14 +1449,11 @@ static int get_args(uint32_t kernel, struct smq_invoke_ctx *ctx)
 	pages = smq_phy_page_start(sc, list);
 	ipage = pages;
 	args = (uintptr_t)ctx->buf->virt + metalen;
-	for (i = 0; i < bufs; ++i) {
-		size_t len = lpra[i].buf.len;
-
-		list[i].num = 0;
-		list[i].pgidx = 0;
-		if (!len)
-			continue;
-		list[i].num = 1;
+	for (i = 0; i < bufs + handles; ++i) {
+		if (lpra[i].buf.len)
+			list[i].num = 1;
+		else
+			list[i].num = 0;
 		list[i].pgidx = ipage - pages;
 		ipage++;
 	}
@@ -1489,6 +1496,16 @@ static int get_args(uint32_t kernel, struct smq_invoke_ctx *ctx)
 		rpra[i].buf.pv = lrpra[i].buf.pv = buf;
 	}
 	PERF_END);
+
+	for (i = bufs; i < bufs + handles; ++i) {
+		struct fastrpc_mmap *map = ctx->maps[i];
+
+		pages[i].addr = map->phys;
+		pages[i].size = map->size;
+	}
+	fdlist = (uint64_t *)&pages[bufs + handles];
+	for (i = 0; i < M_FDLIST; i++)
+		fdlist[i] = 0;
 
 	/* copy non ion buffers */
 	PERF(ctx->fl->profile, ctx->fl->perf.copy,
@@ -1561,13 +1578,10 @@ static int get_args(uint32_t kernel, struct smq_invoke_ctx *ctx)
 	}
 	PERF_END);
 
-	inh = inbufs + outbufs;
-	for (i = 0; rpra && lrpra && i < REMOTE_SCALARS_INHANDLES(sc); i++) {
-		rpra[inh + i].buf.pv = lrpra[inh + i].buf.pv =
-				ptr_to_uint64(ctx->lpra[inh + i].buf.pv);
-		rpra[inh + i].buf.len = lrpra[inh + i].buf.len =
-				ctx->lpra[inh + i].buf.len;
-		rpra[inh + i].h = lrpra[inh + i].h = ctx->lpra[inh + i].h;
+	for (i = bufs; rpra && lrpra && i < bufs + handles; i++) {
+		rpra[i].dma.fd = lrpra[i].dma.fd = ctx->fds[i];
+		rpra[i].dma.len = lrpra[i].dma.len = (uint32_t)lpra[i].buf.len;
+		rpra[i].dma.offset = lrpra[i].dma.offset = (uint32_t)(uintptr_t)lpra[i].buf.pv;
 	}
 
  bail:
@@ -1578,12 +1592,20 @@ static int put_args(uint32_t kernel, struct smq_invoke_ctx *ctx,
 		    remote_arg_t *upra)
 {
 	uint32_t sc = ctx->sc;
+	struct smq_invoke_buf *list;
+	struct smq_phy_page *pages;
+	struct fastrpc_mmap *mmap;
+	uint64_t *fdlist;
 	remote_arg64_t *rpra = ctx->lrpra;
-	int i, inbufs, outbufs, outh, size;
+	int i, inbufs, outbufs, handles;
 	int err = 0;
 
 	inbufs = REMOTE_SCALARS_INBUFS(sc);
 	outbufs = REMOTE_SCALARS_OUTBUFS(sc);
+	handles = REMOTE_SCALARS_INHANDLES(sc) + REMOTE_SCALARS_OUTHANDLES(sc);
+	list = smq_invoke_buf_start(ctx->rpra, sc);
+	pages = smq_phy_page_start(sc, list);
+	fdlist = (uint64_t *)(pages + inbufs + outbufs + handles);
 	for (i = inbufs; i < inbufs + outbufs; ++i) {
 		if (!ctx->maps[i]) {
 			K_COPY_TO_USER(err, kernel,
@@ -1597,12 +1619,14 @@ static int put_args(uint32_t kernel, struct smq_invoke_ctx *ctx,
 			ctx->maps[i] = NULL;
 		}
 	}
-	size = sizeof(*rpra) * REMOTE_SCALARS_OUTHANDLES(sc);
-	if (size) {
-		outh = inbufs + outbufs + REMOTE_SCALARS_INHANDLES(sc);
-		K_COPY_TO_USER(err, kernel, &upra[outh], &rpra[outh], size);
-		if (err)
-			goto bail;
+	if (inbufs + outbufs + handles) {
+		for (i = 0; i < M_FDLIST; i++) {
+			if (!fdlist[i])
+				break;
+			if (!fastrpc_mmap_find(ctx->fl, (int)fdlist[i], 0, 0,
+						0, &mmap))
+				fastrpc_mmap_free(mmap);
+		}
 	}
  bail:
 	return err;
@@ -1668,7 +1692,6 @@ static void inv_args(struct smq_invoke_ctx *ctx)
 	int i, inbufs, outbufs;
 	uint32_t sc = ctx->sc;
 	remote_arg64_t *rpra = ctx->lrpra;
-	int inv = 0;
 
 	inbufs = REMOTE_SCALARS_INBUFS(sc);
 	outbufs = REMOTE_SCALARS_OUTBUFS(sc);
@@ -1687,7 +1710,6 @@ static void inv_args(struct smq_invoke_ctx *ctx)
 
 		if (buf_page_start(ptr_to_uint64((void *)rpra)) ==
 				buf_page_start(rpra[i].buf.pv)) {
-			inv = 1;
 			continue;
 		}
 		if (map && map->handle)
