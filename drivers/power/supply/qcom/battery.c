@@ -138,23 +138,25 @@ static void split_settled(struct pl_data *chip)
 		total_settled_ua = main_settled_ua + chip->pl_settled_ua;
 	}
 
-	total_current_ua = get_effective_result_locked(chip->usb_icl_votable);
-	if (total_current_ua < 0) {
-		if (!chip->usb_psy)
-			chip->usb_psy = power_supply_get_by_name("usb");
-		if (!chip->usb_psy) {
-			pr_err("Couldn't get usbpsy while splitting settled\n");
-			return;
-		}
-		/* no client is voting, so get the total current from charger */
-		rc = power_supply_get_property(chip->usb_psy,
-			POWER_SUPPLY_PROP_HW_CURRENT_MAX, &pval);
-		if (rc < 0) {
-			pr_err("Couldn't get max current rc=%d\n", rc);
-			return;
-		}
-		total_current_ua = pval.intval;
+	pr_info("main_settled_ua=%d, slave_ua=%d, total_settled_ua=%d\n",
+		main_settled_ua, slave_ua, total_settled_ua);
+
+	chip->usb_psy = power_supply_get_by_name("usb");
+	if (!chip->usb_psy) {
+		pr_err("Couldn't get usbpsy while splitting settled\n");
+		return;
 	}
+
+	rc = power_supply_get_property(chip->usb_psy,
+				       POWER_SUPPLY_PROP_CURRENT_MAX,
+				       &pval);
+	if (rc < 0) {
+		pr_err("Couldn't get usb psy -> current max rc=%d\n", rc);
+		return;
+	}
+	total_current_ua = pval.intval;
+
+	pr_info("total_current_ua is %d\n", total_current_ua);
 
 	/*
 	 * If there is an increase in slave share
@@ -198,8 +200,7 @@ static void split_settled(struct pl_data *chip)
 		rc = power_supply_set_property(chip->main_psy,
 				POWER_SUPPLY_PROP_CURRENT_MAX, &pval);
 		if (rc < 0) {
-			pr_err("Couldn't change slave suspend state rc=%d\n",
-					rc);
+			pr_err("Couldn't change main current max rc=%d\n", rc);
 			return;
 		}
 	}
@@ -207,8 +208,7 @@ static void split_settled(struct pl_data *chip)
 	chip->total_settled_ua = total_settled_ua;
 	chip->pl_settled_ua = slave_ua;
 
-	pl_dbg(chip, PR_PARALLEL,
-		"Split total_current_ua=%d main_settled_ua=%d slave_ua=%d\n",
+	pr_info("Split total_current_ua=%d main_settled_ua=%d slave_ua=%d\n",
 		total_current_ua, main_settled_ua, slave_ua);
 }
 

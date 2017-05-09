@@ -896,7 +896,8 @@ static int smb2_usb_main_get_prop(struct power_supply *psy,
 		rc = smblib_get_prop_fcc_delta(chg, val);
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
-		rc = smblib_get_icl_current(chg, &val->intval);
+		rc = smblib_get_charge_param(chg, &chg->param.usb_icl,
+					     &val->intval);
 		break;
 	default:
 		pr_debug("get prop %d is not supported in usb-main\n", psp);
@@ -926,7 +927,8 @@ static int smb2_usb_main_set_prop(struct power_supply *psy,
 		rc = smblib_set_charge_param(chg, &chg->param.fcc, val->intval);
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
-		rc = smblib_set_icl_current(chg, val->intval);
+		rc = smblib_set_charge_param(chg, &chg->param.usb_icl,
+					     val->intval);
 		break;
 	default:
 		pr_err("set prop %d is not supported\n", psp);
