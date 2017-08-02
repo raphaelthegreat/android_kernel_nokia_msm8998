@@ -25,6 +25,7 @@
 #include <linux/module.h>
 #include <linux/input.h>
 #include <linux/kthread.h>
+#include <soc/qcom/msm-core.h>
 
 static unsigned int use_input_evts_with_hi_slvt_detect;
 static struct mutex managed_cpus_lock;
@@ -427,7 +428,7 @@ static int set_cpu_min_freq(const char *buf, const struct kernel_param *kp)
 	struct cpufreq_policy policy;
 	cpumask_var_t limit_mask;
 	int ret;
-	
+
 	if (touchboost == 0)
 		return 0;
 
@@ -516,7 +517,7 @@ static int set_cpu_max_freq(const char *buf, const struct kernel_param *kp)
 
 	if (touchboost == 0)
 		return 0;
-	
+
 	while ((cp = strpbrk(cp + 1, " :")))
 		ntokens++;
 
