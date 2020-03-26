@@ -255,16 +255,13 @@ struct fastrpc_ioctl_control {
 	};
 };
 
+#define FASTRPC_MAX_DSP_ATTRIBUTES	(256)
+#define FASTRPC_MAX_ATTRIBUTES	(257)
+
 struct fastrpc_ioctl_capability {
 	uint32_t domain;
 	uint32_t attribute_ID;
 	uint32_t capability;
-};
-
-#define FASTRPC_MAX_DSP_ATTRIBUTES	(7)
-struct fastrpc_ioctl_dsp_capabilities {
-	uint32_t domain;	//! DSP domain to query capabilities
-	uint32_t dsp_attributes[FASTRPC_MAX_DSP_ATTRIBUTES];
 };
 
 struct smq_null_invoke {
