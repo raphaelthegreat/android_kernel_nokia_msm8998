@@ -97,6 +97,8 @@
 #define FASTRPC_STATIC_HANDLE_LISTENER (3)
 #define FASTRPC_STATIC_HANDLE_MAX (20)
 
+#define MAX_SIZE_LIMIT (0x70000000)
+
 #define PERF_END (void)0
 
 #define PERF(enb, cnt, ff) \
@@ -803,6 +805,13 @@ static int fastrpc_mmap_create(struct fastrpc_file *fl, int fd, unsigned attr,
 		} else {
 			map->size = buf_page_size(len);
 		}
+
+		VERIFY(err, map->size >= len && map->size < MAX_SIZE_LIMIT);
+		if (err) {
+			err = -EFAULT;
+			goto bail;
+		}
+
 		vmid = fl->apps->channel[fl->cid].vmid;
 		if (vmid) {
 			int srcVM[1] = {VMID_HLOS};
@@ -837,9 +846,11 @@ static int fastrpc_buf_alloc(struct fastrpc_file *fl, size_t size,
 	struct fastrpc_buf *buf = NULL, *fr = NULL;
 	struct hlist_node *n;
 
-	VERIFY(err, size > 0);
-	if (err)
+	VERIFY(err, size > 0 && size < MAX_SIZE_LIMIT);
+	if (err) {
+		err = -EFAULT;
 		goto bail;
+	}
 
 	if (!remote) {
 		/* find the smallest buffer that fits in the cache */
@@ -3497,7 +3508,7 @@ static int fastrpc_cb_probe(struct device *dev)
 		start = 0x60000000;
 	VERIFY(err, !IS_ERR_OR_NULL(sess->smmu.mapping =
 				arm_iommu_create_mapping(&platform_bus_type,
-						start, 0x70000000)));
+						start, MAX_SIZE_LIMIT)));
 	if (err)
 		goto bail;
 	iommu_set_fault_handler(sess->smmu.mapping->domain,
