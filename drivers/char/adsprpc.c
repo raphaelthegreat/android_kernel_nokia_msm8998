@@ -534,6 +534,7 @@ static int fastrpc_mmap_find(struct fastrpc_file *fl, int fd, uintptr_t va,
 static int dma_alloc_memory(dma_addr_t *region_start, void **vaddr, size_t size,
 			struct dma_attrs *attrs)
 {
+	int err = 0;
 	struct fastrpc_apps *me = &gfa;
 
 	if (me->dev == NULL) {
@@ -541,6 +542,13 @@ static int dma_alloc_memory(dma_addr_t *region_start, void **vaddr, size_t size,
 		return -ENODEV;
 	}
 
+	VERIFY(err, size > 0 && size < MAX_SIZE_LIMIT);
+	if (err) {
+		err = -EFAULT;
+		pr_err("adsprpc: %s: invalid allocation size 0x%zx\n",
+			__func__, size);
+		return err;
+	}
 	*vaddr = dma_alloc_attrs(me->dev, size, region_start,
 				 GFP_KERNEL, attrs);
 	if (IS_ERR_OR_NULL(*vaddr)) {
