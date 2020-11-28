@@ -294,7 +294,6 @@ void qdf_snprintf(char *str_buffer, unsigned int size, char *str_format, ...)
 qdf_export_symbol(qdf_snprintf);
 
 #ifdef QDF_ENABLE_TRACING
-
 /**
  * qdf_trace_msg() - externally called trace function
  * @module: Module identifier a member of the QDF_MODULE_ID
@@ -327,6 +326,7 @@ void qdf_vtrace_msg(QDF_MODULE_ID module, QDF_TRACE_LEVEL level,
 	qdf_trace_msg_cmn(qdf_pidx, module, level, str_format, val);
 }
 qdf_export_symbol(qdf_vtrace_msg);
+#endif /* QDF_ENABLE_TRACING */
 
 #define ROW_SIZE 16
 /* Buffer size = data bytes(2 hex chars plus space) + NULL */
@@ -370,8 +370,6 @@ void qdf_trace_hex_dump(QDF_MODULE_ID module, QDF_TRACE_LEVEL level,
 	}
 }
 qdf_export_symbol(qdf_trace_hex_dump);
-
-#endif
 
 #ifdef TRACE_RECORD
 /**
@@ -3150,6 +3148,7 @@ static inline void print_to_console(char *str_buffer)
 }
 #endif
 
+#ifdef WLAN_DEBUG
 #ifdef MULTI_IF_NAME
 static const char *qdf_trace_wlan_modname(void)
 {
@@ -3233,6 +3232,7 @@ void qdf_trace_msg_cmn(unsigned int idx,
 	}
 }
 qdf_export_symbol(qdf_trace_msg_cmn);
+#endif /* WLAN_DEBUG */
 
 QDF_STATUS qdf_print_setup(void)
 {
@@ -3656,6 +3656,7 @@ QDF_STATUS qdf_print_set_category_verbose(unsigned int idx,
 }
 qdf_export_symbol(qdf_print_set_category_verbose);
 
+#ifdef WLAN_DEBUG
 bool qdf_print_is_category_enabled(unsigned int idx, QDF_MODULE_ID category)
 {
 	QDF_TRACE_LEVEL verbose_mask;
@@ -3687,6 +3688,7 @@ bool qdf_print_is_category_enabled(unsigned int idx, QDF_MODULE_ID category)
 		return true;
 }
 qdf_export_symbol(qdf_print_is_category_enabled);
+#endif
 
 bool qdf_print_is_verbose_enabled(unsigned int idx, QDF_MODULE_ID category,
 				  QDF_TRACE_LEVEL verbose)
