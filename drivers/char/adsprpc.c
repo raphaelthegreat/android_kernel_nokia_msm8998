@@ -611,10 +611,14 @@ static void fastrpc_mmap_free(struct fastrpc_mmap *map)
 	if (!map)
 		return;
 	fl = map->fl;
-	if (!fl)
+	/* remote heap and dynamic loading memory
+	 * maps expected to initialize with NULL
+	 */
+	if (!fl && !(map->flags == ADSP_MMAP_HEAP_ADDR ||
+			map->flags == ADSP_MMAP_REMOTE_HEAP_ADDR))
 		return;
-	if (!(map->flags == ADSP_MMAP_HEAP_ADDR ||
-				map->flags == ADSP_MMAP_REMOTE_HEAP_ADDR)) {
+	if (fl && !(map->flags == ADSP_MMAP_HEAP_ADDR ||
+			map->flags == ADSP_MMAP_REMOTE_HEAP_ADDR)) {
 		cid = fl->cid;
 		VERIFY(err, cid >= ADSP_DOMAIN_ID && cid < NUM_CHANNELS);
 		if (err) {
