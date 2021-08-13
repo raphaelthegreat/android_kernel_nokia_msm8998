@@ -785,7 +785,6 @@ static void siw_touch_upgrade_work_func(struct work_struct *work)
 			t_dev_err(dev, "FW upgrade skipped\n");
 		} else {
 			t_dev_err(dev, "FW upgrade halted, %d\n", ret);
-			printk("BBox::UEC;7::6\n");//SW8-DH-fw_upgrade-fail
 		}
 	//	siw_touch_qd_init_work_now(ts);
 	//	atomic_set(&ts->state.core, CORE_NORMAL);
@@ -798,7 +797,6 @@ static void siw_touch_upgrade_work_func(struct work_struct *work)
 	siw_ops_power(ts, POWER_OFF);
 	touch_msleep(1);
 	siw_ops_power(ts, POWER_ON);
-
 	siw_touch_qd_init_work_now(ts);
 #endif
 }
@@ -1375,7 +1373,6 @@ static struct siw_touch_pdata *_siw_touch_do_probe_common(struct siw_ts *ts)
 	ret = siw_ops_probe(ts);
 	if (ret) {
 		t_dev_err(dev, "failed to probe, %d\n", ret);
-		printk("BBox::UEC;7::0\n");//SW8-DH-lg4946_probe_fail
 		goto out_ops_probe;
 	}
 
@@ -1816,5 +1813,3 @@ __siw_setup_u32("siw_mfts_lpwg=", siw_setup_mfts_lpwg, t_mfts_lpwg);
 __siw_setup_u32("siw_lpwg_mode=", siw_setup_lpwg_mode, t_lpwg_mode);
 __siw_setup_u32("siw_lpwg_screen=", siw_setup_lpwg_screen, t_lpwg_screen);
 __siw_setup_u32("siw_lpwg_sensor=", siw_setup_lpwg_sensor, t_lpwg_sensor);
-
-

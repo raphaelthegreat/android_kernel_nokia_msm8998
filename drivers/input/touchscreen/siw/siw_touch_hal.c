@@ -208,7 +208,7 @@ static int siw_hal_tc_driving(struct device *dev, int mode);
 
 
 #define TCI_FAIL_NUM 11
-static const char const *siw_hal_tci_debug_str[TCI_FAIL_NUM] = {
+static const char *siw_hal_tci_debug_str[TCI_FAIL_NUM] = {
 	"NONE",
 	"DISTANCE_INTER_TAP",
 	"DISTANCE_TOUCHSLOP",
@@ -223,7 +223,7 @@ static const char const *siw_hal_tci_debug_str[TCI_FAIL_NUM] = {
 };
 
 #define SWIPE_FAIL_NUM 7
-static const char const *siw_hal_swipe_debug_str[SWIPE_FAIL_NUM] = {
+static const char *siw_hal_swipe_debug_str[SWIPE_FAIL_NUM] = {
 	"ERROR",
 	"1FINGER_FAST_RELEASE",
 	"MULTI_FINGER",
@@ -1545,7 +1545,7 @@ static int siw_hal_ic_info_ver_check(struct device *dev)
 	return -EINVAL;
 }
 
-static int siw_hal_do_ic_info(struct device *dev, int prt_on)
+static int siw_hal_ic_info(struct device *dev)
 {
 	struct siw_touch_chip *chip = to_touch_chip(dev);
 	struct siw_ts *ts = chip->ts;
@@ -1588,7 +1588,6 @@ static int siw_hal_do_ic_info(struct device *dev, int prt_on)
 	ret = siw_hal_xfer_msg(dev, ts->xfer);
 	if (ret < 0) {
 		t_dev_err(dev, "ic_info(1): xfer failed, %d\n", ret);
-		printk("BBox::UEC;7::5\n");//SW8-DH-Get_fw_verion_fail
 		return ret;
 	}
 
@@ -1640,7 +1639,7 @@ static int siw_hal_do_ic_info(struct device *dev, int prt_on)
 
 		ferr = siw_hal_fw_chk_version_ext(fw->version_ext,
 									fw->v.version.ext);
-		t_dev_info_sel(dev, prt_on,
+		t_dev_dbg_base(dev,
 				"[T] chip id %s, version %08X(%u.%02u) (0x%02X) %s\n",
 				chip->fw.chip_id,
 				fw->version_ext,
@@ -1648,14 +1647,14 @@ static int siw_hal_do_ic_info(struct device *dev, int prt_on)
 				fw->revision,
 				(ferr < 0) ? "(invalid)" : "");
 	} else {
-		t_dev_info_sel(dev, prt_on,
+		t_dev_dbg_base(dev,
 				"[T] chip id %s, version v%u.%02u (0x%08Xh, 0x%02X)\n",
 				fw->chip_id,
 				fw->v.version.major, fw->v.version.minor,
 				version, fw->revision);
 
 	}
-	t_dev_info_sel(dev, prt_on,
+	t_dev_dbg_base(dev,
 			"[T] product id %s, flash boot %s(%s), crc %s (0x%08X)\n",
 			fw->product_id,
 			((bootmode >> 1) & 0x1) ? "BUSY" : "idle",
@@ -1690,10 +1689,10 @@ static int siw_hal_do_ic_info(struct device *dev, int prt_on)
 
 	switch (touch_chip_type(ts)) {
 	case CHIP_LG4946:
-		t_dev_info_sel(dev, prt_on,
+		t_dev_dbg_base(dev,
 			"[T] fpc %d, wfr %d, cg %d, lot %d\n",
 			fw->fpc, fw->wfr, fw->cg, fw->lot);
-		t_dev_info_sel(dev, prt_on,
+		t_dev_dbg_base(dev,
 			"[T] sn %Xh, "
 			"date %04d.%02d.%02d, time %02d:%02d:%02d site%d\n",
 			fw->sn,
@@ -1723,11 +1722,6 @@ static int siw_hal_do_ic_info(struct device *dev, int prt_on)
 	}
 
 	return ret;
-}
-
-static int siw_hal_ic_info(struct device *dev)
-{
-	return siw_hal_do_ic_info(dev, 1);
 }
 
 #if defined(__SIW_CONFIG_FB)
