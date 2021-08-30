@@ -367,10 +367,12 @@ static void clear_static_power(struct cpu_static_info *sp)
 
 BLOCKING_NOTIFIER_HEAD(msm_core_stats_notifier_list);
 
+#ifdef CONFIG_APSS_CORE_EA
 struct blocking_notifier_head *get_power_update_notifier(void)
 {
 	return &msm_core_stats_notifier_list;
 }
+#endif
 
 int register_cpu_pwr_stats_ready_notifier(struct notifier_block *nb)
 {
@@ -619,11 +621,13 @@ static int msm_core_task_init(struct device *dev)
 }
 #endif
 
+#ifdef CONFIG_APSS_CORE_EA
 struct cpu_pwr_stats *get_cpu_pwr_stats(void)
 {
 	return cpu_stats;
 }
 EXPORT_SYMBOL(get_cpu_pwr_stats);
+#endif
 
 static int msm_get_power_values(int cpu, struct cpu_static_info *sp)
 {
