@@ -559,7 +559,7 @@ static long qti_ctrl_ioctl(struct file *fp, unsigned cmd, unsigned long arg)
 		val = atomic_read(&port->line_state);
 		ret = copy_to_user((void __user *)arg, &val, sizeof(val));
 		if (ret) {
-			pr_err("copying to user space failed");
+			pr_err("%s(): copying to user space failed", __func__);
 			ret = -EFAULT;
 		}
 		pr_debug("%s: Sent line_state: %d for port type:%d\n", __func__,
@@ -571,13 +571,13 @@ static long qti_ctrl_ioctl(struct file *fp, unsigned cmd, unsigned long arg)
 							port->port_type);
 		val = atomic_read(&port->connected);
 		if (!val) {
-			pr_err_ratelimited("EP_LOOKUP failed: not connected\n");
+			pr_err_ratelimited("%s(): EP_LOOKUP failed: not connected\n", __func__);
 			ret = -EAGAIN;
 			break;
 		}
 
 		if (port->ipa_prod_idx == -1 && port->ipa_cons_idx == -1) {
-			pr_err_ratelimited("EP_LOOKUP ipa pipes not updated\n");
+			pr_err_ratelimited("%s(): EP_LOOKUP ipa pipes not updated\n", __func__);
 			ret = -EAGAIN;
 			break;
 		}
@@ -598,12 +598,12 @@ static long qti_ctrl_ioctl(struct file *fp, unsigned cmd, unsigned long arg)
 		ret = copy_to_user((void __user *)arg, &info,
 			sizeof(info));
 		if (ret) {
-			pr_err("copying to user space failed");
+			pr_err("%s(): copying to user space failed", __func__);
 			ret = -EFAULT;
 		}
 		break;
 	default:
-		pr_err("wrong parameter");
+		pr_err("%s(): wrong parameter %d", __func__, cmd);
 		ret = -EINVAL;
 	}
 

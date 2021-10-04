@@ -1241,7 +1241,7 @@ static long gsi_ctrl_dev_ioctl(struct file *fp, unsigned cmd,
 		val = atomic_read(&gsi->connected);
 		ret = copy_to_user((void __user *)arg, &val, sizeof(val));
 		if (ret) {
-			log_event_err("copy_to_user fail LINE_STATE");
+			log_event_err("%s: copy_to_user fail LINE_STATE", __func__);
 			ret = -EFAULT;
 		}
 		log_event_dbg("%s: Sent line_state: %d for prot id:%d",
@@ -1253,7 +1253,7 @@ static long gsi_ctrl_dev_ioctl(struct file *fp, unsigned cmd,
 		log_event_dbg("%s: EP_LOOKUP for prot id:%d", __func__,
 							gsi->prot_id);
 		if (!atomic_read(&gsi->connected)) {
-			log_event_dbg("EP_LOOKUP failed: not connected");
+			log_event_dbg("%s: EP_LOOKUP failed: not connected", __func__);
 			ret = -EAGAIN;
 			break;
 		}
@@ -1288,7 +1288,7 @@ static long gsi_ctrl_dev_ioctl(struct file *fp, unsigned cmd,
 		ret = copy_to_user((void __user *)arg, &info,
 			sizeof(info));
 		if (ret) {
-			log_event_err("copy_to_user fail MBIM");
+			log_event_err("%s: copy_to_user fail MBIM", __func__);
 			ret = -EFAULT;
 		}
 		break;
@@ -1297,10 +1297,10 @@ static long gsi_ctrl_dev_ioctl(struct file *fp, unsigned cmd,
 			&gsi->d_port.ntb_info.ntb_input_size,
 			sizeof(gsi->d_port.ntb_info.ntb_input_size));
 		if (ret) {
-			log_event_err("copy_to_user failNTB_SIZE");
+			log_event_err("%s: copy_to_user failNTB_SIZE", __func__);
 			ret = -EFAULT;
 		}
-		log_event_dbg("Sent NTB size %d",
+		log_event_dbg("%s: Sent NTB size %d", __func__,
 				gsi->d_port.ntb_info.ntb_input_size);
 		break;
 	case GSI_MBIM_GET_DATAGRAM_COUNT:
@@ -1308,14 +1308,14 @@ static long gsi_ctrl_dev_ioctl(struct file *fp, unsigned cmd,
 			&gsi->d_port.ntb_info.ntb_max_datagrams,
 			sizeof(gsi->d_port.ntb_info.ntb_max_datagrams));
 		if (ret) {
-			log_event_err("copy_to_user fail DATAGRAM");
+			log_event_err("%s: copy_to_user fail DATAGRAM", __func__);
 			ret = -EFAULT;
 		}
-		log_event_dbg("Sent NTB datagrams count %d",
+		log_event_dbg("%s: Sent NTB datagrams count %d", __func__,
 			gsi->d_port.ntb_info.ntb_max_datagrams);
 		break;
 	default:
-		log_event_err("wrong parameter");
+		log_event_err("%s: wrong parameter %d", __func__, cmd);
 		ret = -EINVAL;
 	}
 
