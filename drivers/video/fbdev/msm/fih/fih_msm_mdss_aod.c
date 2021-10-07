@@ -124,7 +124,7 @@ int fih_set_glance(int enable)
 }
 int fih_get_glance(void)
 {
-	pr_info("***%s: Glance enabled(%d)***\n", __func__,glance_option);
+	pr_debug("***%s: Glance enabled(%d)***\n", __func__,glance_option);
 
 	return glance_option;
 }
@@ -240,19 +240,19 @@ int mdss_dsi_panel_LH530QH1_low_power_config(struct mdss_panel_data *pdata,int e
 		}
 
 		if(pinfo->aod_screen_timeout&& !enable){
-			pr_info("%s: AOD screen timeout leave\n", __func__);
+			pr_debug("%s: AOD screen timeout leave\n", __func__);
 			pinfo->aod_screen_timeout = 0;
 			return 0;
 		}
 
-		pr_info("%s: ctrl=%pK ndx=%d enable=%d\n", __func__, ctrl, ctrl->ndx,
+		pr_debug("%s: ctrl=%pK ndx=%d enable=%d\n", __func__, ctrl, ctrl->ndx,
 			enable);
 		blank = fih_get_blank_mode();
 
 		if(enable){
 			if(pinfo->aod_ready_on)
 			{
-				pr_info("%s: Already initial Glance mode\n", __func__);
+				pr_debug("%s: Already initial Glance mode\n", __func__);
 				msleep(200);
 			}
 			#ifdef CONFIG_TOUCHSCREEN_SIW
@@ -261,15 +261,15 @@ int mdss_dsi_panel_LH530QH1_low_power_config(struct mdss_panel_data *pdata,int e
 			}
 			#endif
 
-			pr_info("%s: Always on display is enable\n", __func__);
+			pr_debug("%s: Always on display is enable\n", __func__);
 #ifdef CONFIG_TOUCHSCREEN_SIW
 			if ((touch_cb.touch_vendor_id_read != NULL) &&(touch_cb.touch_vendor_id_read() == LGD)){
 				//SW8-DH-Double_Tap_workaround+[
 				if(ctrl->ndx == DSI_CTRL_0){
-				pr_info("%s, U3 -> U2 , Step 1 : LPWG setup\n", __func__);
+				pr_debug("%s, U3 -> U2 , Step 1 : LPWG setup\n", __func__);
 				siw_hal_lpwg_FIH(9, 1, 0, 1, 0);
 				//SW8-DH-Double_Tap_workaround+]
-				pr_info("%s, U3 -> U2, Step 2 : Set diplay mode to U2\n", __func__);
+				pr_debug("%s, U3 -> U2, Step 2 : Set diplay mode to U2\n", __func__);
 				}
 			}
 #endif
@@ -280,7 +280,7 @@ int mdss_dsi_panel_LH530QH1_low_power_config(struct mdss_panel_data *pdata,int e
 #ifdef CONFIG_TOUCHSCREEN_SIW
 			if ((touch_cb.touch_vendor_id_read != NULL) &&(touch_cb.touch_vendor_id_read() == LGD)){
 				if(ctrl->ndx == DSI_CTRL_0){
-					pr_info("%s , U3 -> U2, Step 3 : Change lcd_mode to U2 via notifier\n", __func__);
+					pr_debug("%s , U3 -> U2, Step 3 : Change lcd_mode to U2 via notifier\n", __func__);
 					siw_touch_notifier_call_chain(LCD_EVENT_LCD_MODE, (void *)&panel_mode);
 				}
 			}
@@ -293,18 +293,18 @@ int mdss_dsi_panel_LH530QH1_low_power_config(struct mdss_panel_data *pdata,int e
 
 			if(blank!=FB_BLANK_UNBLANK)
 			{
-				pr_info("%s: Still in low power mode\n", __func__);
+				pr_debug("%s: Still in low power mode\n", __func__);
 				msleep(100);
 				goto end;
 			}
 #ifdef CONFIG_TOUCHSCREEN_SIW
 			if ((touch_cb.touch_vendor_id_read != NULL) &&(touch_cb.touch_vendor_id_read() == LGD)){
 				if (ctrl->ndx == DSI_CTRL_0) {
-					pr_info(" %s U2 -> U3, Step 3 : Set diplay mode to U3\n", __func__);
+					pr_debug(" %s U2 -> U3, Step 3 : Set diplay mode to U3\n", __func__);
 				}
 			}
 #endif
-			pr_info("%s: Always on display is disable\n", __func__);
+			pr_debug("%s: Always on display is disable\n", __func__);
 			on_cmds = &ctrl->aod_resume_cmds;
 			#ifdef CONFIG_TOUCHSCREEN_SIW
 			if(ctrl->ndx== DSI_CTRL_0){
@@ -321,7 +321,7 @@ int mdss_dsi_panel_LH530QH1_low_power_config(struct mdss_panel_data *pdata,int e
 #ifdef CONFIG_TOUCHSCREEN_SIW
 			if ((touch_cb.touch_vendor_id_read != NULL) &&(touch_cb.touch_vendor_id_read() == LGD)){
 				if (ctrl->ndx == DSI_CTRL_0) {
-					pr_info("%s U2 -> U3, Step 4 : Change lcd_mode to U3 via notifier \n", __func__);
+					pr_debug("%s U2 -> U3, Step 4 : Change lcd_mode to U3 via notifier \n", __func__);
 					siw_touch_notifier_call_chain(LCD_EVENT_LCD_MODE, (void *)&panel_mode);
 					pr_debug("%s: dsi_on from panel low power state\n", __func__);
 					ctrl->tp_state=4;
@@ -334,7 +334,7 @@ int mdss_dsi_panel_LH530QH1_low_power_config(struct mdss_panel_data *pdata,int e
 			pinfo->aod_ready_on = 0;
 		}
 	/* Any panel specific low power commands/config */
-	pr_info("%s:-\n", __func__);
+	pr_debug("%s:-\n", __func__);
 end:
 	if(ctrl->ndx== DSI_CTRL_1)
 		previous_blank = blank;
@@ -362,18 +362,18 @@ int mdss_dsi_panel_D53G6EA8151_low_power_config(struct mdss_panel_data *pdata,in
 			if (ctrl->ndx != DSI_CTRL_LEFT)
 				goto end;
 		}
-		pr_info("%s: ctrl=%pK ndx=%d enable=%d\n", __func__, ctrl, ctrl->ndx,
+		pr_debug("%s: ctrl=%pK ndx=%d enable=%d\n", __func__, ctrl, ctrl->ndx,
 			enable);
 		blank = fih_get_blank_mode();
 
 		if(enable){
 			if(pinfo->aod_ready_on)
 			{
-				pr_info("%s: Already initial Glance mode\n", __func__);
+				pr_debug("%s: Already initial Glance mode\n", __func__);
 				msleep(200);
 			}
 
-			pr_info("%s: Always on display is enable\n", __func__);
+			pr_debug("%s: Always on display is enable\n", __func__);
 
 			if (ctrl->aod_suspend_cmds.cmd_cnt)
 					mdss_dsi_panel_cmds_send(ctrl, &ctrl->aod_suspend_cmds, CMD_REQ_COMMIT);
@@ -386,12 +386,12 @@ int mdss_dsi_panel_D53G6EA8151_low_power_config(struct mdss_panel_data *pdata,in
 
 			if(blank!=FB_BLANK_UNBLANK)
 			{
-				pr_info("%s: Still in low power mode\n", __func__);
+				pr_debug("%s: Still in low power mode\n", __func__);
 				msleep(100);
 				goto end;
 			}
 
-			pr_info("%s: Always on display is disable\n", __func__);
+			pr_debug("%s: Always on display is disable\n", __func__);
 			on_cmds = &ctrl->aod_resume_cmds;
 			pinfo->aod_screen_timeout=0;
 
@@ -402,7 +402,7 @@ int mdss_dsi_panel_D53G6EA8151_low_power_config(struct mdss_panel_data *pdata,in
 			pinfo->aod_ready_on = 0;
 		}
 	/* Any panel specific low power commands/config */
-	pr_info("%s:-\n", __func__);
+	pr_debug("%s:-\n", __func__);
 end:
 	if(ctrl->ndx== DSI_CTRL_1)
 		previous_blank = blank;
@@ -472,7 +472,7 @@ static int mdss_dsi_panel_LPM053A348A_low_power_config(struct mdss_panel_data *p
 	}
 
 	if(pinfo->aod_screen_timeout && !enable){
-		pr_info("%s: AOD screen timeout leave\n", __func__);
+		pr_debug("%s: AOD screen timeout leave\n", __func__);
 		pinfo->aod_screen_timeout = 0;
 		return 0;
 	}
@@ -484,13 +484,13 @@ static int mdss_dsi_panel_LPM053A348A_low_power_config(struct mdss_panel_data *p
 
 		if(pinfo->aod_ready_on)
 		{
-			pr_info("%s: Already initial Glance mode\n", __func__);
+			pr_debug("%s: Already initial Glance mode\n", __func__);
 			msleep(200);
 			goto end;
 		}
 		on_cmds = &ctrl->aod_8color_enter_cmds;
 
-		pr_info("%s: Always on display is enable\n", __func__);
+		pr_debug("%s: Always on display is enable\n", __func__);
 
 		if (on_cmds->cmd_cnt)
 			mdss_dsi_panel_cmds_send(ctrl, on_cmds, CMD_REQ_COMMIT);
@@ -530,7 +530,7 @@ static int mdss_dsi_panel_LPM053A348A_low_power_config(struct mdss_panel_data *p
 			goto end;
 		if(blank!=FB_BLANK_UNBLANK)
 		{
-			pr_info("%s: Still in low power mode\n", __func__);
+			pr_debug("%s: Still in low power mode\n", __func__);
 			msleep(100);
 			goto end;
 		}
@@ -554,7 +554,7 @@ static int mdss_dsi_panel_LPM053A348A_low_power_config(struct mdss_panel_data *p
 		#endif
 
 	}
-	pr_info("%s:-\n", __func__);
+	pr_debug("%s:-\n", __func__);
 
 end:
 	if(ctrl->ndx== DSI_CTRL_1)
@@ -579,18 +579,18 @@ void fih_mdss_lp_config(struct mdss_panel_data *pdata,int enable,int ndx)
 	}
 
 	if(!fih_get_glance()){
-		pr_info("%s, the panel is not enable glance\n",__func__);
+		pr_debug("%s, the panel is not enable glance\n",__func__);
 		fih_set_recovery_touch(1);
 		return;
 	}
 
-	pr_info("%s, mdss_dsi%d\n",__func__,ndx);
+	pr_debug("%s, mdss_dsi%d\n",__func__,ndx);
 	if(!pinfo->aod_ready_on)
 	{
 		//If it is not FIH AP trigger Doze low power mode reject initial code setting
-		pr_info("%s, aod ready is %d, enable state %d \n",__func__,pinfo->aod_ready_on,enable);
+		pr_debug("%s, aod ready is %d, enable state %d \n",__func__,pinfo->aod_ready_on,enable);
 		if(!fih_get_glance()){
-			pr_info("%s, mdss It is not Doze AP \n",__func__);
+			pr_debug("%s, mdss It is not Doze AP \n",__func__);
 			return;
 		}
 	}
@@ -622,7 +622,7 @@ void mdss_lp_early_config(struct mdss_panel_data *pdata)
 	pinfo = &pdata->panel_info;
 
 	if (ctrl_pdata->low_power_config&& ctrl_pdata->cmd_early_lp_exit){
-		pr_info("%s: dsi_unblank with panel always on\n", __func__);
+		pr_debug("%s: dsi_unblank with panel always on\n", __func__);
 		ctrl_pdata->low_power_config(pdata, false);
 	}
 	return;
@@ -644,13 +644,13 @@ void mdss_aod_resume_config(struct mdss_panel_data *pdata)
 				panel_data);
 
 	if(!fih_get_glance()){
-		pr_info("%s, the panel is not enable glance\n",__func__);
+		pr_debug("%s, the panel is not enable glance\n",__func__);
 		return;
 	}
 
 
 	if(pinfo->aod_ready_on){
-		pr_info("%s, Brfore is aod suspend\n", __func__);
+		pr_debug("%s, Brfore is aod suspend\n", __func__);
 		if(pinfo->panel_id==LGD_LH530QH1_WQXGA_CMD_PANEL){
 			pinfo->aod_ready_on=0;
 			if (ctrl->aod_resume_cmds.cmd_cnt)
@@ -726,13 +726,13 @@ int fih_set_low_power_mode(int enable)
 	int i =0,j=0,k=0;
 	int bl_restore=0;
 	if(!aod_feature){
-			pr_info("Not support AOD feature\n");
+			pr_debug("Not support AOD feature\n");
 			return 0;
 	}
-	pr_info("%s, the panel %s Doze mode\n",__func__,enable?"enter":"leave");
+	pr_debug("%s, the panel %s Doze mode\n",__func__,enable?"enter":"leave");
 
 	if(!fih_get_glance()){
-		pr_info("%s, the panel is not enable glance\n",__func__);
+		pr_debug("%s, the panel is not enable glance\n",__func__);
 		return 0;
 	}
 	for(i=0;i<DSI_CTRL_MAX;i++)
@@ -755,7 +755,7 @@ int fih_set_low_power_mode(int enable)
 		/*As leave AOD, disable backlight to avoid flicker. And control backlight by one porting only*/
 		if(!enable && adata!=NULL &&j==0 && pinfo->aod_ready_on){
 			bl_restore=pinfo->aod_bl_backup;
-			pr_info("%s,mdss old backlight,level(%d)+\n",__func__,bl_restore);
+			pr_debug("%s,mdss old backlight,level(%d)+\n",__func__,bl_restore);
 			if(bl_restore!=0){
 				adata->set_backlight(adata, 0);
 			}
@@ -771,7 +771,7 @@ int fih_set_low_power_mode(int enable)
 			pr_err("%s, the panel don't support Doze mode\n",__func__);
 
 		if(bl_restore!=0&& adata!=NULL&&k==0 ){
-			pr_info("%s,mdss restore backlight,level(%d)\n",__func__,bl_restore);
+			pr_debug("%s,mdss restore backlight,level(%d)\n",__func__,bl_restore);
 			adata->set_backlight(adata, bl_restore);
 			k++;
 		}
@@ -808,7 +808,7 @@ int mdss_set_tp_event(struct mdss_panel_data *pdata,int event)
 	case TP_EVENT_REINIT:
 		if ((touch_cb.touch_vendor_id_read != NULL) &&(touch_cb.touch_vendor_id_read() == LGD)){
 			if (ctrl->ndx == DSI_CTRL_0) {
-				pr_info("%s U2 -> U3, Step 4 : Change lcd_mode to U3 via notifier \n", __func__);
+				pr_debug("%s U2 -> U3, Step 4 : Change lcd_mode to U3 via notifier \n", __func__);
 				siw_touch_notifier_call_chain(LCD_EVENT_LCD_MODE, (void *)&panel_mode);
 				pr_debug("%s: dsi_on from panel low power state\n", __func__);
 				ctrl->tp_state=4;
@@ -831,7 +831,7 @@ int fih_get_low_power_mode(void)
 	struct mdss_panel_info *pinfo;
 	pinfo = &gpdata->panel_data.panel_info;
 	if(!aod_feature){
-		pr_info("Not support AOD feature");
+		pr_debug("Not support AOD feature");
 		return 0;
 	}
 	return pinfo->aod_ready_on;
@@ -872,9 +872,9 @@ void fih_mdss_dsi_aod_panel_init(struct platform_device *pdev,struct mdss_dsi_ct
 		return;
 	}
 
-	pr_info("\n\n***%s, aod_feature = %d ***\n\n", __func__, aod_feature);
+	pr_debug("\n\n***%s, aod_feature = %d ***\n\n", __func__, aod_feature);
 	if(aod_feature>=DSI_CTRL_MAX){
-		pr_info("\n\n***%s, aod_feature, probe ok return  ***\n\n", __func__);
+		pr_debug("\n\n***%s, aod_feature, probe ok return  ***\n\n", __func__);
 		return;
 	}
 
@@ -884,8 +884,8 @@ void fih_mdss_dsi_aod_panel_init(struct platform_device *pdev,struct mdss_dsi_ct
 		(ctrl_pdata->aod_8color_exit_cmds.cmd_cnt))){
 		aod_feature++;
 	}
-	pr_info("\n\n***%s, aod_feature = %d ***\n\n", __func__, aod_feature);
-	pr_info("\n\n***%s, probe pass return \n\n", __func__);
+	pr_debug("\n\n***%s, aod_feature = %d ***\n\n", __func__, aod_feature);
+	pr_debug("\n\n***%s, probe pass return \n\n", __func__);
 	return;
 error_no_mem:
 	if(ctrl_id==DSI_CTRL_0)
