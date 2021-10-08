@@ -36,7 +36,10 @@ extern struct fih_touch_cb touch_cb;
 #if defined(CONFIG_FIH_NB1) || defined(CONFIG_FIH_A1N)
 #ifdef CONFIG_AOD_FEATURE
 #include "fih/fih_msm_mdss_aod.h"
-#endif
+#else
+#define fih_get_glance() 0
+#define fih_get_aod() 0
+#endif // CONFIG_AOD_FEATURE
 
 #ifdef CONFIG_PANEL_POWER_CONTROL_FEATURE
 #include "fih/fih_msm_mdss_pwr.h"

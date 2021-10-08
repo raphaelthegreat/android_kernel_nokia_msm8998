@@ -36,8 +36,12 @@ extern int fih_get_blank_mode(void);
 extern int fih_set_blank_mode(int mode);
 extern int fih_get_aod_wled_state(void);
 extern int fih_set_aod_wled_state(int enable);
+#ifdef CONFIG_AOD_FEATURE
 extern int fih_set_glance(int enable);
 extern int fih_get_glance(void);
+#else
+#define fih_get_glance() 0
+#endif /* CONFIG_AOD_FEATURE */
 extern int fih_set_recovery_touch(bool covery);
 extern int fih_get_recovery_touch(void);
 

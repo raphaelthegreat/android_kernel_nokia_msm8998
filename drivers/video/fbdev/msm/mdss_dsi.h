@@ -525,7 +525,6 @@ struct mdss_dsi_ctrl_pdata {
 	struct dsi_panel_cmds post_aod_8color_enter_cmds;
 	struct dsi_panel_cmds aod_8color_exit_cmds;
 	bool cmd_early_lp_exit;
-	int tp_state;
 	#endif
 	#endif
 	u32 *status_valid_params;

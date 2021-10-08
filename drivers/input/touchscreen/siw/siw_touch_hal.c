@@ -87,9 +87,13 @@ int touch_prox_status_write(unsigned int enable);
 void touch_vendor_read(char *buf);//SW8-DH-Vendor_Read-00+
 
 int touch_LCM_RTC_CLK(int master_en);
+#ifdef CONFIG_AOD_FEATURE
 extern int fih_get_glance(void);//SW8-DH-AllPowerOff
 extern int fih_get_aod_timeout(void);//SW8-DH-AllPowerOff
-
+#else
+#define fih_get_glance() 0
+#define fih_get_aod_timeout() 0
+#endif /* CONFIG_AOD_FEATURE */
 
 static unsigned int double_tap_enable = LPWG_DOUBLE_TAP;
 static unsigned int prox_status = PROX_FAR;

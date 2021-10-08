@@ -20,7 +20,6 @@
 extern struct fih_touch_cb touch_cb;
 #endif
 
-#include "fih_msm_mdss_aod.h"
 #define BBOX_LCM_POWER_STATE_FAIL	do {printk("BBox;%s: Power status abnormal!\n", __func__); printk("BBox::UEC;0::6\n");} while (0);
 
 extern int mdss_dsi_pinctrl_set_state(

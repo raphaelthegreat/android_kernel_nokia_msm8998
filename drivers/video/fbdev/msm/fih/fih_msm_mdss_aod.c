@@ -328,7 +328,6 @@ int mdss_dsi_panel_LH530QH1_low_power_config(struct mdss_panel_data *pdata,int e
 					pr_debug("%s U2 -> U3, Step 4 : Change lcd_mode to U3 via notifier \n", __func__);
 					siw_touch_notifier_call_chain(LCD_EVENT_LCD_MODE, (void *)&panel_mode);
 					pr_debug("%s: dsi_on from panel low power state\n", __func__);
-					ctrl->tp_state=4;
 				}
 			}
 #endif
@@ -814,7 +813,6 @@ int mdss_set_tp_event(struct mdss_panel_data *pdata,int event)
 				pr_debug("%s U2 -> U3, Step 4 : Change lcd_mode to U3 via notifier \n", __func__);
 				siw_touch_notifier_call_chain(LCD_EVENT_LCD_MODE, (void *)&panel_mode);
 				pr_debug("%s: dsi_on from panel low power state\n", __func__);
-				ctrl->tp_state=4;
 			}
 		}
 		break;

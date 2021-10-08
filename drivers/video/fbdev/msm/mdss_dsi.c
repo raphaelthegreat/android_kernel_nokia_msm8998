@@ -41,10 +41,12 @@
 #include "../../../fih/fih_touch.h"//SW8-DH-TP_vendor-00+
 extern struct fih_touch_cb touch_cb;
 #endif
+
 #if defined(CONFIG_FIH_NB1) || defined(CONFIG_FIH_A1N)
 #ifdef CONFIG_AOD_FEATURE
 #include "fih/fih_msm_mdss_aod.h"
 #endif
+
 #ifdef CONFIG_PANEL_POWER_CONTROL_FEATURE
 #include "fih/fih_msm_mdss_pwr.h"
 #endif
@@ -53,7 +55,7 @@ extern struct fih_touch_cb touch_cb;
 #include "fih/fih_mdss_global.h"
 #endif
 
-#endif
+#endif /* defined(CONFIG_FIH_NB1) || defined(CONFIG_FIH_A1N) */
 
 
 #define XO_CLK_RATE	19200000
@@ -237,7 +239,7 @@ static int mdss_dsi_pinctrl_set_state(struct mdss_dsi_ctrl_pdata *ctrl_pdata,
 					bool active);
 #endif
 
-#ifdef CONFIG_AOD_FEATURE
+#if defined(CONFIG_AOD_FEATURE) || defined(CONFIG_PANEL_POWER_CONTROL_FEATURE)
 struct mdss_dsi_ctrl_pdata *mdss_dsi_get_ctrl(u32 ctrl_id)
 #else
 static struct mdss_dsi_ctrl_pdata *mdss_dsi_get_ctrl(u32 ctrl_id)
@@ -1579,13 +1581,12 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 #ifdef CONFIG_FIH_NB1
 #ifdef CONFIG_TOUCHSCREEN_SIW
 	if((touch_cb.touch_vendor_id_read != NULL) && (touch_cb.touch_vendor_id_read() == LGD)){
-		if (ctrl_pdata->ndx == DSI_CTRL_0) { 
+		if (ctrl_pdata->ndx == DSI_CTRL_0) {
 			//lpwg control must be preceed to panel power on
 			//SW8-DH-Double_Tap_workaround+[
 			pr_info("%s, %s -> U3 , Step 1 : LPWG setup\n", __func__, fih_get_aod()? "U2":"U0");
 			siw_hal_lpwg_FIH(9, 0, 1, 1, 0);
 			//SW8-DH-Double_Tap_workaround+]
-			ctrl_pdata->tp_state=1;
 		}
 	}
 #endif
@@ -1606,11 +1607,10 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 #ifdef CONFIG_FIH_NB1
 #ifdef CONFIG_TOUCHSCREEN_SIW
 	if((touch_cb.touch_vendor_id_read != NULL) && (touch_cb.touch_vendor_id_read() == LGD)){
-		if (ctrl_pdata->ndx == DSI_CTRL_0) { 
-			//lpwg control must be preceed to panel power on			
+		if (ctrl_pdata->ndx == DSI_CTRL_0) {
+			//lpwg control must be preceed to panel power on
 			pr_info("%s, %s -> U3, Step 2 : Set RESET notifier\n", __func__, fih_get_aod()? "U2":"U0");
 			siw_touch_notifier_call_chain(LCD_EVENT_HW_RESET, NULL);//SW8-DH-Touch-Notify-00+
-			ctrl_pdata->tp_state=2;
 		}
 	}
 #endif
