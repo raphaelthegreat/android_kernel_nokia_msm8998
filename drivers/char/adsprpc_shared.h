@@ -30,6 +30,8 @@
 #define FASTRPC_IOCTL_GETPERF	_IOWR('R', 9, struct fastrpc_ioctl_perf)
 #define FASTRPC_IOCTL_INIT_ATTRS _IOWR('R', 10, struct fastrpc_ioctl_init_attrs)
 #define FASTRPC_IOCTL_CONTROL	_IOWR('R', 12, struct fastrpc_ioctl_control)
+#define FASTRPC_IOCTL_GET_DSP_INFO \
+				_IOWR('R', 17, struct fastrpc_ioctl_capability)
 
 #define FASTRPC_GLINK_GUID "fastrpcglink-apps-dsp"
 #define FASTRPC_SMD_GUID "fastrpcsmd-apps-dsp"
@@ -226,6 +228,12 @@ struct fastrpc_ioctl_control {
 		struct fastrpc_ctrl_smmu smmu;
 		struct fastrpc_ctrl_kalloc kalloc;
 	};
+};
+
+struct fastrpc_ioctl_capability {
+	uint32_t domain;
+	uint32_t attribute_ID;
+	uint32_t capability;
 };
 
 struct smq_null_invoke {

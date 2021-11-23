@@ -3163,6 +3163,7 @@ static long fastrpc_device_ioctl(struct file *file, unsigned int ioctl_num,
 		struct fastrpc_ioctl_init_attrs init;
 		struct fastrpc_ioctl_perf perf;
 		struct fastrpc_ioctl_control cp;
+		struct fastrpc_ioctl_capability cap;
 	} p;
 	void *param = (char *)ioctl_param;
 	struct fastrpc_file *fl = (struct fastrpc_file *)file->private_data;
@@ -3319,6 +3320,28 @@ static long fastrpc_device_ioctl(struct file *file, unsigned int ioctl_num,
 		if (err)
 			goto bail;
 		VERIFY(err, 0 == fastrpc_init_process(fl, &p.init));
+		if (err)
+			goto bail;
+		break;
+	case FASTRPC_IOCTL_GET_DSP_INFO:
+		K_COPY_FROM_USER(err, 0, &p.cap, param,
+						sizeof(p.cap));
+		if (err)
+			goto bail;
+
+		VERIFY(err, p.cap.domain < NUM_CHANNELS);
+		if (err) {
+			err = -ECHRNG;
+			goto bail;
+		}
+
+		pr_info("%s: stub for ioctl 0xC00C5211. err = %d, domain = %d, attribute_id = %d, capability = %d", __func__,
+			err, p.cap.domain, p.cap.attribute_ID, p.cap.capability);
+
+		p.cap.capability = 0;
+
+		K_COPY_TO_USER(err, 0, &((struct fastrpc_ioctl_capability *)
+			param)->capability, &p.cap.capability, sizeof(p.cap.capability));
 		if (err)
 			goto bail;
 		break;
