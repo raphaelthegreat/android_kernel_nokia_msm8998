@@ -5343,20 +5343,20 @@ static void fih_update_batt_info_work(struct work_struct *work)
 							update_batt_info_work.work);
 
 	val.intval = 0;
+	smblib_get_prop_usb_online(chg, &val);
+	usb_online = (val.intval == 1) ? true : false;
+
+	val.intval = 0;
 	rc = smblib_get_prop_batt_capacity(chg, &val);
 	capacity = val.intval;
 
 	/* only log when capacity is normal and charging */
-	if(rc < 0 || capacity < 0 || capacity >= 100)
+	if(!usb_online || rc < 0 || capacity < 0 || capacity >= 100)
 		goto sched_work;
 
 	val.intval = 0;
 	smblib_get_prop_input_suspend(chg, &val);
 	input_suspend = (val.intval == 1) ? true : false;
-
-	val.intval = 0;
-	smblib_get_prop_usb_online(chg, &val);
-	usb_online = (val.intval == 1) ? true : false;
 
 	val.intval = 0;
 	smblib_get_prop_input_current_settled(chg, &val);
