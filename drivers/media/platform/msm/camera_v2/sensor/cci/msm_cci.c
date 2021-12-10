@@ -1578,11 +1578,11 @@ static int32_t msm_cci_release(struct v4l2_subdev *sd)
 		goto ahb_vote_suspend;
 	}
 	if (--cci_dev->ref_count) {
-		pr_err("%s ref_count Exit %d\n", __func__, cci_dev->ref_count);
+		CDBG("%s ref_count Exit %d\n", __func__, cci_dev->ref_count);
 		rc = 0;
 		goto ahb_vote_suspend;
 	}else
-		pr_err("%s ref_count Exit %d\n", __func__, cci_dev->ref_count);
+		CDBG("%s ref_count Exit %d\n", __func__, cci_dev->ref_count);
 	for (i = 0; i < MASTER_MAX; i++)
 		if (cci_dev->write_wq[i])
 			flush_workqueue(cci_dev->write_wq[i]);
