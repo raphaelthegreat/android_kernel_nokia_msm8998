@@ -4568,8 +4568,6 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic6");
 	snd_soc_dapm_ignore_suspend(dapm, "MADINPUT");
 	snd_soc_dapm_ignore_suspend(dapm, "MAD_CPE_INPUT");
-	snd_soc_dapm_ignore_suspend(dapm, "MAD_CPE_OUT1");
-	snd_soc_dapm_ignore_suspend(dapm, "MAD_CPE_OUT2");
 	snd_soc_dapm_ignore_suspend(dapm, "EAR");
 	snd_soc_dapm_ignore_suspend(dapm, "LINEOUT1");
 	snd_soc_dapm_ignore_suspend(dapm, "LINEOUT2");
@@ -4588,6 +4586,9 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
 		snd_soc_dapm_ignore_suspend(dapm, "LINEOUT4");
 		snd_soc_dapm_ignore_suspend(dapm, "ANC LINEOUT1");
 		snd_soc_dapm_ignore_suspend(dapm, "ANC LINEOUT2");
+	} else {
+		snd_soc_dapm_ignore_suspend(dapm, "MAD_CPE_OUT1");
+		snd_soc_dapm_ignore_suspend(dapm, "MAD_CPE_OUT2");
 	}
 
 	snd_soc_dapm_sync(dapm);
@@ -9596,7 +9597,7 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	if (ret) {
 		dev_dbg(&pdev->dev, "%s: failed to add child nodes, ret=%d\n",
 			__func__, ret);
-	} 
+	}
 #ifdef USE_QC_HIFI_AMP
 	else {
 		pdata->hph_en1_gpio_p = of_parse_phandle(pdev->dev.of_node,
