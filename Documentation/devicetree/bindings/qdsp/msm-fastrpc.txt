@@ -14,8 +14,6 @@ Optional properties:
 - qcom,fastrpc-vmid-heap-shared:  Flag for Dynamic heap feature, to
                                   share HLOS memory buffer to ADSP
 - qcom,secure-domains:  FastRPC secure domain configuration
-- qcom,fastrpc-adsp-audio-pdr: Flag to enable ADSP Audio PDR
-- qcom,fastrpc-adsp-sensors-pdr: Flag to enable Sensors PDR
 
 Optional subnodes:
 - qcom,msm_fastrpc_compute_cb :	Child nodes representing the compute context
@@ -26,15 +24,11 @@ Subnode Required properties:
 - iommus : 		A list of phandle and IOMMU specifier pairs that describe the
 			IOMMU master interfaces of the device
 
-Subnode Optional properties:
-- shared-cb : 		Present if context bank need to be shared
-
 Example:
 	qcom,msm_fastrpc {
 		compatible = "qcom,msm-fastrpc-adsp";
 		qcom,fastrpc-glink;
 		qcom,fastrpc-vmid-heap-shared;
-		qcom,fastrpc-adsp-sensors-pdr;
 
 		qcom,msm_fastrpc_compute_cb_1 {
 			compatible = "qcom,msm-fastrpc-compute-cb";
@@ -45,7 +39,6 @@ Example:
 			compatible = "qcom,msm-fastrpc-compute-cb";
 			label = "adsprpc-smd";
 			iommus = <&lpass_q6_smmu 9>,
-			shared-cb;
 		};
 	};
 
