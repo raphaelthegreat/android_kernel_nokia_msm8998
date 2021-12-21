@@ -129,6 +129,6 @@ android/configs/android-*.cfg
 Android.bp
 
 error.log
-out/
-clang-llvm/
-AnyKernel3/
+out
+clang-llvm
+AnyKernel3
